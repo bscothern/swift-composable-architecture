@@ -10,7 +10,7 @@ import Foundation
 
 extension Shared {
   public init(
-    wrappedValue value: Value,
+    wrappedValue value: @autoclosure () -> Value,
     _ persistenceKey: some PersistenceKey<Value>,
     fileID: StaticString = #fileID,
     line: UInt = #line
@@ -23,7 +23,7 @@ extension Shared {
             return reference
           } else {
             let reference = ValueReference(
-              initialValue: value,
+              initialValue: value(),
               persistenceKey: persistenceKey,
               fileID: fileID,
               line: line
@@ -73,13 +73,13 @@ extension Shared {
   }
 
   public init<Key: PersistenceKey>(
-    wrappedValue: Value,
+    wrappedValue: @autoclosure () -> Value,
     _ persistenceKey: PersistenceKeyDefault<Key>,
     fileID: StaticString = #fileID,
     line: UInt = #line
   ) where Key.Value == Value {
     self.init(
-      wrappedValue: wrappedValue,
+      wrappedValue: wrappedValue(),
       persistenceKey.base,
       fileID: fileID,
       line: line
@@ -89,7 +89,7 @@ extension Shared {
 
 extension SharedReader {
   public init(
-    wrappedValue value: Value,
+    wrappedValue value: @autoclosure () -> Value,
     _ persistenceKey: some PersistenceReaderKey<Value>,
     fileID: StaticString = #fileID,
     line: UInt = #line
@@ -102,7 +102,7 @@ extension SharedReader {
             return reference
           } else {
             let reference = ValueReference(
-              initialValue: value,
+              initialValue: value(),
               persistenceKey: persistenceKey,
               fileID: fileID,
               line: line
@@ -152,13 +152,13 @@ extension SharedReader {
   }
 
   public init<Key: PersistenceReaderKey>(
-    wrappedValue: Value,
+    wrappedValue: @autoclosure () -> Value,
     _ persistenceKey: PersistenceKeyDefault<Key>,
     fileID: StaticString = #fileID,
     line: UInt = #line
   ) where Key.Value == Value {
     self.init(
-      wrappedValue: wrappedValue,
+      wrappedValue: wrappedValue(),
       persistenceKey.base,
       fileID: fileID,
       line: line

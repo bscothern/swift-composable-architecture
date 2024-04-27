@@ -447,6 +447,25 @@ final class SharedTests: XCTestCase {
     await store.send(.incrementInReducer)
   }
 
+  @MainActor
+  func testLazyValueInit() async {
+    struct LazyInitValue: ExpressibleByIntegerLiteral, Equatable {
+      static var initCount: LockIsolated<Int> = .init(0)
+      let value: Int
+      init(integerLiteral value: Int) {
+        Self.initCount.withValue { $0 += 1 }
+        self.value = value
+      }
+    }
+    @Shared(.inMemory(#function)) var one: LazyInitValue = 1
+    @Shared(.inMemory(#function)) var two: LazyInitValue = 2
+
+    XCTAssertEqual(one.value, 1)
+    XCTAssertEqual(two.value, 1)
+    XCTAssertEqual($one, $two)
+    XCTAssertEqual(LazyInitValue.initCount.value, 1)
+  }
+
   func testObservation() {
     @Shared var count: Int
     _count = Shared(0)
@@ -786,6 +805,7 @@ final class SharedTests: XCTestCase {
     }
   }
 
+  @available(iOS 16.0, *)
   func testEquatability_Reference() {
     let count = Shared(0)
     @Shared(.appStorage("count")) var appStorageCount = 0
